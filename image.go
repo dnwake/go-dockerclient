@@ -281,6 +281,16 @@ type PullImageOptions struct {
 //
 // See https://goo.gl/iJkZjD for more details.
 func (c *Client) PullImage(opts PullImageOptions, auth AuthConfiguration) error {
+	if ShouldUseContentTrust(opts.Tag) {
+		digest, err := GetTrustedDigestToPull(opts.Repository, opts.Tag,
+			auth.Username, auth.Password,
+			auth.Email, auth.ServerAddress)
+		if err != nil {
+			return err
+		}
+		opts.Tag = digest
+	}
+
 	if opts.Repository == "" {
 		return ErrNoSuchImage
 	}
