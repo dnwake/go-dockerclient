@@ -45,7 +45,7 @@ prepare_docker:
 
 pretest: lint vet fmtcheck
 
-test: pretest
+test: pretest content-trust-integration
 	$(foreach pkg,$(PKGS),go test $(pkg) || exit;)
 
 integration:
@@ -58,3 +58,6 @@ cov:
 
 clean:
 	$(foreach pkg,$(PKGS),go clean $(pkg) || exit;)
+
+content-trust-integration:
+	$(MAKE) -s -C content_trust_integration_testing clean all

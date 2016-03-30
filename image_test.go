@@ -31,6 +31,7 @@ func newTestClient(rt *FakeRoundTripper) Client {
 		SkipServerVersionCheck: true,
 		serverAPIVersion:       testAPIVersion,
 	}
+	PullUsesDockerCli = false
 	return client
 }
 

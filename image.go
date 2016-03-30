@@ -14,6 +14,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
+	"strconv"
+	"strings"
+	"syscall"
 	"time"
 )
 
@@ -81,6 +85,9 @@ var (
 	// ErrMustSpecifyNames is the error rreturned when the Names field on
 	// ExportImagesOptions is nil or empty
 	ErrMustSpecifyNames = errors.New("must specify at least one name to export")
+
+	// PullUsesDockerCli if set to true, use the docker CLI for pulls
+	PullUsesDockerCli = true
 )
 
 // ListImagesOptions specify parameters to the ListImages function.
@@ -276,6 +283,69 @@ type PullImageOptions struct {
 	RawJSONStream bool      `qs:"-"`
 }
 
+// executeCommand executes the specified command
+//
+// Returns (stdout, stderr, exitValue, error), where
+//   stdout is the command's standard output, as a string
+//      or the empty string if the command failed to execute
+//   stderr is the command's standard error, as a string
+//      or the empty string if the command failed to execute
+//   exitValue is the command's exit value, as an int
+//      or -1 if the command failed to execute
+//   error is non-nil if and only if the command failed to execute
+//
+func executeCommand(name string, args ...string) (string, string, int, error) {
+	cmd := exec.Command(name, args...)
+
+	exitValue := 0
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+
+	if err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			exitValue = exitError.Sys().(syscall.WaitStatus).ExitStatus()
+		} else {
+			return "", "", -1, err
+		}
+	}
+	return stdout.String(), stderr.String(), exitValue, nil
+}
+
+// pullImageUsingDockerCli pulls an image from a remote registry,
+// using the docker CLI
+//
+func pullImageUsingDockerCli(opts PullImageOptions) error {
+	tagIsEmpty := (opts.Tag == "")
+	tagIsDigest := (strings.Index(opts.Tag, ":") >= 0)
+	dockerPullArg := ""
+
+	if tagIsEmpty {
+		dockerPullArg = opts.Repository
+	} else if tagIsDigest {
+		dockerPullArg = opts.Repository + "@" + opts.Tag
+	} else {
+		// tag is actually a tag
+		dockerPullArg = opts.Repository + ":" + opts.Tag
+	}
+
+	stdout, stderr, exitValue, err := executeCommand("docker", "pull", dockerPullArg)
+
+	if err != nil {
+		return err
+	}
+
+	if exitValue != 0 {
+		return errors.New("Command 'docker pull " + dockerPullArg + "' failed with exit value: " +
+			strconv.Itoa(exitValue) + ", stdout: '" + stdout + "' and stderr: '" + stderr + "'")
+	}
+
+	return nil
+}
+
 // PullImage pulls an image from a remote registry, logging progress to
 // opts.OutputStream.
 //
@@ -283,6 +353,10 @@ type PullImageOptions struct {
 func (c *Client) PullImage(opts PullImageOptions, auth AuthConfiguration) error {
 	if opts.Repository == "" {
 		return ErrNoSuchImage
+	}
+
+	if PullUsesDockerCli {
+		return pullImageUsingDockerCli(opts)
 	}
 
 	headers, err := headersWithAuth(auth)

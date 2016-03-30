@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/fsouza/go-dockerclient/external/github.com/docker/docker/pkg/ioutils"
+	"github.com/dnwake/go-dockerclient/external/github.com/docker/docker/pkg/ioutils"
 )
 
 func TestApplyLayerInvalidFilenames(t *testing.T) {

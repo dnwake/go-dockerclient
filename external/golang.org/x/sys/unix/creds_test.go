@@ -13,7 +13,7 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/fsouza/go-dockerclient/external/golang.org/x/sys/unix"
+	"github.com/dnwake/go-dockerclient/external/golang.org/x/sys/unix"
 )
 
 // TestSCMCredentials tests the sending and receiving of credentials
