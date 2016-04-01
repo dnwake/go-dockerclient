@@ -65,3 +65,6 @@ cov:
 
 clean:
 	$(foreach pkg,$(PKGS),go clean $(pkg) || exit;)
+
+content-trust-integration:
+	$(MAKE) -C content_trust_integration_testing clean all
