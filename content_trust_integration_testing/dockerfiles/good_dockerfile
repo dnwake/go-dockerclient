@@ -1,0 +1,3 @@
+FROM debian:jessie 
+RUN /bin/echo "I AM GOOD" > /var/am_i_good
+ENTRYPOINT ["/bin/bash","-c","sleep 10; cat /var/am_i_good"]

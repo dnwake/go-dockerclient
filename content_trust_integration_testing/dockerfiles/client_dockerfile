@@ -1,0 +1,26 @@
+FROM centos:7
+
+RUN yum -y install vim  \
+tree \
+psmisc \
+sudo \
+git \
+golang \
+openssl \
+lsof \
+sysvinit-tools \
+ca-certificates
+
+## Download Docker directly to get the appropriate client.
+ARG docker_version
+ADD https://get.docker.com/builds/Linux/x86_64/docker-${docker_version} /usr/bin/docker
+RUN chmod +x /usr/bin/docker
+
+### Import the Notary server's certs
+WORKDIR /root
+COPY root-ca.crt /etc/pki/ca-trust/source/anchors/
+RUN update-ca-trust force-enable
+RUN update-ca-trust extract
+
+### Make sure the container keeps running
+ENTRYPOINT ["/bin/bash","-c","while true; do sleep 10; done"]
