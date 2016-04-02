@@ -35,6 +35,9 @@ import (
 	"time"
 )
 
+// ShouldUseContentTrust returns true iff this operation
+// should use Docker content trust
+//
 func ShouldUseContentTrust(tag string) bool {
 	var trusted bool
 	if e := os.Getenv("DOCKER_CONTENT_TRUST"); e != "" {
@@ -49,9 +52,9 @@ func ShouldUseContentTrust(tag string) bool {
 	return trusted && !hasDigest
 }
 
-/// This method returns only one digest, while the original method (trustedPull())
-///  could pull multiple digests if no tag is specified
-///
+// GetTrustedDigestToPull returns the digest to be used in a pull
+// that uses Docker Content Trust
+//
 func GetTrustedDigestToPull(repository string, tag string,
 	username string, password string,
 	email string, serverAddress string) (string, error) {
@@ -197,7 +200,6 @@ func (scs simpleCredentialStore) RefreshToken(u *url.URL, service string) string
 
 func (scs simpleCredentialStore) SetRefreshToken(*url.URL, string, string) {
 }
-
 
 func getPassphraseRetriever() passphrase.Retriever {
 	env := map[string]string{

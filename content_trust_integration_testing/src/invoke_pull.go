@@ -1,24 +1,24 @@
 package main
 
 import (
-        "os"
-        "strings"
-        "github.com/fsouza/go-dockerclient"
+	"github.com/fsouza/go-dockerclient"
+	"os"
+	"strings"
 )
 
 func main() {
-        client, _ := docker.NewClientFromEnv()
-        arg := os.Args[1]
-        tagIndex := strings.LastIndex(arg, ":")
-        tag := "latest"
-        repository := arg
+	client, _ := docker.NewClientFromEnv()
+	arg := os.Args[1]
+	tagIndex := strings.LastIndex(arg, ":")
+	tag := "latest"
+	repository := arg
 
-        if tagIndex != -1 {
-          tag = arg[tagIndex + 1:]
-          repository = arg[:tagIndex]
-        }
+	if tagIndex != -1 {
+		tag = arg[tagIndex+1:]
+		repository = arg[:tagIndex]
+	}
 
-        spec := docker.PullImageOptions{Repository:repository, Tag:tag, OutputStream:os.Stdout}
-        authConfiguration := docker.AuthConfiguration{}
-        client.PullImage(spec, authConfiguration)
+	spec := docker.PullImageOptions{Repository: repository, Tag: tag, OutputStream: os.Stdout}
+	authConfiguration := docker.AuthConfiguration{}
+	client.PullImage(spec, authConfiguration)
 }
