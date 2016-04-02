@@ -4,7 +4,7 @@ tests: | test_bad test_good test_error
 
 test_bad: export TRUST=false
 test_bad: export CORRUPT_IMAGE=true
-test_bad: export EXPECTED=I AM BAD
+test_bad: export EXPECTED_OUTPUT=I AM BAD
 test_bad: prepare_tests
 	echo ""
 	echo ""
@@ -16,7 +16,7 @@ test_bad: prepare_tests
 
 test_good: export TRUST=true
 test_good: export CORRUPT_IMAGE=fals
-test_good: export EXPECTED=I AM GOOD
+test_good: export EXPECTED_OUTPUT=I AM GOOD
 test_good: prepare_tests
 	echo ""
 	echo ""
@@ -29,7 +29,7 @@ test_good: prepare_tests
 ### Should throw error
 test_error: export TRUST=true
 test_error: export CORRUPT_IMAGE=true
-test_error: export EXPECTED=Error response from daemon: manifest unknown: manifest unknown
+test_error: export EXPECTED_RESULT=fail
 test_error: prepare_tests
 	echo ""
 	echo ""

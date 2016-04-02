@@ -9,7 +9,7 @@ export GO_DOCKERCLIENT_DIR=$(THISDIR)/..
 export DOCKER_VERSION=$(shell docker version --format '{{.Server.Version}}')
 
 prepare_client: client
-	echo "Getting all required Go dependencies"
+	echo "Getting all required Go dependencies.  This may take some time..."
 	docker exec -t $(CLIENT_CONTAINER_NAME) bash -c ' \
 	        export GOPATH=/root/go && \
                 if ! test -f $$GOPATH/deps_loaded; then \

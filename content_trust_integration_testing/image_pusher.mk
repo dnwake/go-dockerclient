@@ -3,7 +3,7 @@ export IMAGE_PUSHER_CONTAINER_NAME=image_pusher
 export IMAGE_PUSHER_LOG=$(TMPDIR)/image_pusher_log
 
 push_images: image_pusher good_image bad_image registry notary
-	echo "If necessary, pushing good, bad and corrupted images to the registry"
+	echo "If necessary, pushing good, bad and corrupted images to the registry.  May take some time..."
 	docker exec $(IMAGE_PUSHER_CONTAINER_NAME) bash -c ' \
 		if ! docker pull $(REGISTRY_URL)/$(GOOD_IMAGE_NAME):latest >/dev/null 2>/dev/null; then \
 			export DOCKER_CONTENT_TRUST_ROOT_PASSPHRASE=root; \
