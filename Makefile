@@ -53,7 +53,7 @@ pretest: lint vet fmtcheck
 gotest:
 	$(foreach pkg,$(PKGS),go test $(pkg) || exit;)
 
-test: pretest gotest
+test: pretest gotest content-trust-integration
 
 integration:
 	go test -tags docker_integration -run TestIntegration -v
@@ -67,4 +67,4 @@ clean:
 	$(foreach pkg,$(PKGS),go clean $(pkg) || exit;)
 
 content-trust-integration:
-	$(MAKE) -C content_trust_integration_testing clean all
+	$(MAKE) -s -C content_trust_integration_testing clean all
