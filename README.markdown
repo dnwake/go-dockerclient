@@ -101,6 +101,6 @@ Commited code must pass:
 * [go vet](https://godoc.org/golang.org/x/tools/cmd/vet)
 * [gofmt](https://golang.org/cmd/gofmt)
 * [go test](https://golang.org/cmd/go/#hdr-Test_packages)
-* make content_trust_integration
+* make content-trust-integration
 
 Running `make test` will check all of these. If your editor does not automatically call gofmt, `make fmt` will format all go files in this repository.
