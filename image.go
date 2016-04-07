@@ -85,6 +85,9 @@ var (
 	// ErrMustSpecifyNames is the error rreturned when the Names field on
 	// ExportImagesOptions is nil or empty
 	ErrMustSpecifyNames = errors.New("must specify at least one name to export")
+
+	// PullUsesDockerCli if set to true, use the docker CLI for pulls
+	PullUsesDockerCli = true
 )
 
 // ListImagesOptions specify parameters to the ListImages function.
@@ -332,18 +335,12 @@ func executeCommand(name string, args ...string) (string, string, int, error) {
 	return stdout.String(), stderr.String(), exitValue, nil
 }
 
-// PullImage pulls an image from a remote registry, logging progress to
-// opts.OutputStream.
+// pullImageUsingDockerCli pulls an image from a remote registry,
+// using the docker CLI
 //
-// See https://goo.gl/iJkZjD for more details.
-func (c *Client) PullImage(opts PullImageOptions, auth AuthConfiguration) error {
-	if opts.Repository == "" {
-		return ErrNoSuchImage
-	}
-
+func pullImageUsingDockerCli(opts PullImageOptions) error {
 	tagIsEmpty := (opts.Tag == "")
 	tagIsDigest := (strings.Index(opts.Tag, ":") >= 0)
-
 	dockerPullArg := ""
 
 	if tagIsEmpty {
@@ -367,6 +364,26 @@ func (c *Client) PullImage(opts PullImageOptions, auth AuthConfiguration) error 
 	}
 
 	return nil
+}
+
+// PullImage pulls an image from a remote registry, logging progress to
+// opts.OutputStream.
+//
+// See https://goo.gl/iJkZjD for more details.
+func (c *Client) PullImage(opts PullImageOptions, auth AuthConfiguration) error {
+	if opts.Repository == "" {
+		return ErrNoSuchImage
+	}
+
+	if PullUsesDockerCli {
+		return pullImageUsingDockerCli(opts)
+	}
+
+	headers, err := headersWithAuth(auth)
+	if err != nil {
+		return err
+	}
+	return c.createImage(queryString(&opts), headers, nil, opts.OutputStream, opts.RawJSONStream)
 }
 
 func (c *Client) createImage(qs string, headers map[string]string, in io.Reader, w io.Writer, rawJSONStream bool) error {

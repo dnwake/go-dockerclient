@@ -31,6 +31,7 @@ func newTestClient(rt *FakeRoundTripper) Client {
 		SkipServerVersionCheck: true,
 		serverAPIVersion:       testAPIVersion,
 	}
+	PullUsesDockerCli = false
 	return client
 }
 
@@ -413,124 +414,122 @@ func TestPushImageNoName(t *testing.T) {
 	}
 }
 
-///func TestPullImage(t *testing.T) {
-///	executeCommand = func(name string, args ...string) (string, string, int, error) {
-///		       return "stdout","stderr",0,nil
-///	}
-///	client := newTestClient(fakeRT)
-///	var buf bytes.Buffer
-///	err := client.PullImage(PullImageOptions{Repository: "base", OutputStream: &buf},
-///		AuthConfiguration{})
-///	if err != nil {
-///		t.Fatal(err)
-///	}
-///	expected := "Pulling 1/100"
-///	if buf.String() != expected {
-///		t.Errorf("PullImage: Wrong output. Want %q. Got %q.", expected, buf.String())
-///	}
-///	req := fakeRT.requests[0]
-///	if req.Method != "POST" {
-///		t.Errorf("PullImage: Wrong HTTP method. Want POST. Got %s.", req.Method)
-///	}
-///	u, _ := url.Parse(client.getURL("/images/create"))
-///	if req.URL.Path != u.Path {
-///		t.Errorf("PullImage: Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
-///	}
-///	expectedQuery := "fromImage=base"
-///	if query := req.URL.Query().Encode(); query != expectedQuery {
-///		t.Errorf("PullImage: Wrong query strin. Want %q. Got %q.", expectedQuery, query)
-///	}
-///}
-///
-///func TestPullImageWithRawJSON(t *testing.T) {
-///	body := `
-///	{"status":"Pulling..."}
-///	{"status":"Pulling", "progress":"1 B/ 100 B", "progressDetail":{"current":1, "total":100}}
-///	`
-///	fakeRT := &FakeRoundTripper{
-///		message: body,
-///		status:  http.StatusOK,
-///		header: map[string]string{
-///			"Content-Type": "application/json",
-///		},
-///	}
-///	client := newTestClient(fakeRT)
-///	var buf bytes.Buffer
-///	err := client.PullImage(PullImageOptions{
-///		Repository:    "base",
-///		OutputStream:  &buf,
-///		RawJSONStream: true,
-///	}, AuthConfiguration{})
-///	if err != nil {
-///		t.Fatal(err)
-///	}
-///	if buf.String() != body {
-///		t.Errorf("PullImage: Wrong raw output. Want %q. Got %q", body, buf.String())
-///	}
-///}
-///
-///func TestPullImageWithoutOutputStream(t *testing.T) {
-///	fakeRT := &FakeRoundTripper{message: "Pulling 1/100", status: http.StatusOK}
-///	client := newTestClient(fakeRT)
-///	opts := PullImageOptions{
-///		Repository: "base",
-///		Registry:   "docker.tsuru.io",
-///	}
-///	err := client.PullImage(opts, AuthConfiguration{})
-///	if err != nil {
-///		t.Fatal(err)
-///	}
-///	req := fakeRT.requests[0]
-///	expected := map[string][]string{"fromImage": {"base"}, "registry": {"docker.tsuru.io"}}
-///	got := map[string][]string(req.URL.Query())
-///	if !reflect.DeepEqual(got, expected) {
-///		t.Errorf("PullImage: wrong query string. Want %#v. Got %#v.", expected, got)
-///	}
-///}
-///
-///func TestPullImageCustomRegistry(t *testing.T) {
-///	fakeRT := &FakeRoundTripper{message: "Pulling 1/100", status: http.StatusOK}
-///	client := newTestClient(fakeRT)
-///	var buf bytes.Buffer
-///	opts := PullImageOptions{
-///		Repository:   "base",
-///		Registry:     "docker.tsuru.io",
-///		OutputStream: &buf,
-///	}
-///	err := client.PullImage(opts, AuthConfiguration{})
-///	if err != nil {
-///		t.Fatal(err)
-///	}
-///	req := fakeRT.requests[0]
-///	expected := map[string][]string{"fromImage": {"base"}, "registry": {"docker.tsuru.io"}}
-///	got := map[string][]string(req.URL.Query())
-///	if !reflect.DeepEqual(got, expected) {
-///		t.Errorf("PullImage: wrong query string. Want %#v. Got %#v.", expected, got)
-///	}
-///}
-///
-///func TestPullImageTag(t *testing.T) {
-///	fakeRT := &FakeRoundTripper{message: "Pulling 1/100", status: http.StatusOK}
-///	client := newTestClient(fakeRT)
-///	var buf bytes.Buffer
-///	opts := PullImageOptions{
-///		Repository:   "base",
-///		Registry:     "docker.tsuru.io",
-///		Tag:          "latest",
-///		OutputStream: &buf,
-///	}
-///	err := client.PullImage(opts, AuthConfiguration{})
-///	if err != nil {
-///		t.Fatal(err)
-///	}
-///	req := fakeRT.requests[0]
-///	expected := map[string][]string{"fromImage": {"base"}, "registry": {"docker.tsuru.io"}, "tag": {"latest"}}
-///	got := map[string][]string(req.URL.Query())
-///	if !reflect.DeepEqual(got, expected) {
-///		t.Errorf("PullImage: wrong query string. Want %#v. Got %#v.", expected, got)
-///	}
-///}
-///
+func TestPullImage(t *testing.T) {
+	fakeRT := &FakeRoundTripper{message: "Pulling 1/100", status: http.StatusOK}
+	client := newTestClient(fakeRT)
+	var buf bytes.Buffer
+	err := client.PullImage(PullImageOptions{Repository: "base", OutputStream: &buf},
+		AuthConfiguration{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := "Pulling 1/100"
+	if buf.String() != expected {
+		t.Errorf("PullImage: Wrong output. Want %q. Got %q.", expected, buf.String())
+	}
+	req := fakeRT.requests[0]
+	if req.Method != "POST" {
+		t.Errorf("PullImage: Wrong HTTP method. Want POST. Got %s.", req.Method)
+	}
+	u, _ := url.Parse(client.getURL("/images/create"))
+	if req.URL.Path != u.Path {
+		t.Errorf("PullImage: Wrong request path. Want %q. Got %q.", u.Path, req.URL.Path)
+	}
+	expectedQuery := "fromImage=base"
+	if query := req.URL.Query().Encode(); query != expectedQuery {
+		t.Errorf("PullImage: Wrong query strin. Want %q. Got %q.", expectedQuery, query)
+	}
+}
+
+func TestPullImageWithRawJSON(t *testing.T) {
+	body := `
+	{"status":"Pulling..."}
+	{"status":"Pulling", "progress":"1 B/ 100 B", "progressDetail":{"current":1, "total":100}}
+	`
+	fakeRT := &FakeRoundTripper{
+		message: body,
+		status:  http.StatusOK,
+		header: map[string]string{
+			"Content-Type": "application/json",
+		},
+	}
+	client := newTestClient(fakeRT)
+	var buf bytes.Buffer
+	err := client.PullImage(PullImageOptions{
+		Repository:    "base",
+		OutputStream:  &buf,
+		RawJSONStream: true,
+	}, AuthConfiguration{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if buf.String() != body {
+		t.Errorf("PullImage: Wrong raw output. Want %q. Got %q", body, buf.String())
+	}
+}
+
+func TestPullImageWithoutOutputStream(t *testing.T) {
+	fakeRT := &FakeRoundTripper{message: "Pulling 1/100", status: http.StatusOK}
+	client := newTestClient(fakeRT)
+	opts := PullImageOptions{
+		Repository: "base",
+		Registry:   "docker.tsuru.io",
+	}
+	err := client.PullImage(opts, AuthConfiguration{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := fakeRT.requests[0]
+	expected := map[string][]string{"fromImage": {"base"}, "registry": {"docker.tsuru.io"}}
+	got := map[string][]string(req.URL.Query())
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("PullImage: wrong query string. Want %#v. Got %#v.", expected, got)
+	}
+}
+
+func TestPullImageCustomRegistry(t *testing.T) {
+	fakeRT := &FakeRoundTripper{message: "Pulling 1/100", status: http.StatusOK}
+	client := newTestClient(fakeRT)
+	var buf bytes.Buffer
+	opts := PullImageOptions{
+		Repository:   "base",
+		Registry:     "docker.tsuru.io",
+		OutputStream: &buf,
+	}
+	err := client.PullImage(opts, AuthConfiguration{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := fakeRT.requests[0]
+	expected := map[string][]string{"fromImage": {"base"}, "registry": {"docker.tsuru.io"}}
+	got := map[string][]string(req.URL.Query())
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("PullImage: wrong query string. Want %#v. Got %#v.", expected, got)
+	}
+}
+
+func TestPullImageTag(t *testing.T) {
+	fakeRT := &FakeRoundTripper{message: "Pulling 1/100", status: http.StatusOK}
+	client := newTestClient(fakeRT)
+	var buf bytes.Buffer
+	opts := PullImageOptions{
+		Repository:   "base",
+		Registry:     "docker.tsuru.io",
+		Tag:          "latest",
+		OutputStream: &buf,
+	}
+	err := client.PullImage(opts, AuthConfiguration{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := fakeRT.requests[0]
+	expected := map[string][]string{"fromImage": {"base"}, "registry": {"docker.tsuru.io"}, "tag": {"latest"}}
+	got := map[string][]string(req.URL.Query())
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("PullImage: wrong query string. Want %#v. Got %#v.", expected, got)
+	}
+}
+
 func TestPullImageNoRepository(t *testing.T) {
 	var opts PullImageOptions
 	client := Client{}
