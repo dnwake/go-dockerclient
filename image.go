@@ -280,6 +280,26 @@ type PullImageOptions struct {
 	RawJSONStream bool      `qs:"-"`
 }
 
+///
+/// // Returns (stdout, stderr, exitValue, error), where
+/// //   stdout is the command's standard output, as a string
+/// //      or the empty string if the command failed to execute
+/// //   stderr is the command's standard error, as a string
+/// //      or the empty string if the command failed to execute
+/// //   exitValue is the command's exit value, as an int
+/// //      or -1 if the command failed to execute
+/// //   error is non-nil if and only if the command failed to execute
+/// //
+/// type CommandExecutor func(name string, args ...string) (string, string, int, error)
+///
+/// type CommandExecutionDependency struct {
+///      execute_command CommandExecutor
+/// }
+///
+/// func NewCommandExecutionDependency(ce CommandExecutor) *CommandExecutionDependency {
+///     return &CommandExecutionDependency{execute_command: cd}
+/// }
+///
 // ExecuteCommand executes the specified command
 //
 // Returns (stdout, stderr, exitValue, error), where
@@ -291,7 +311,7 @@ type PullImageOptions struct {
 //      or -1 if the command failed to execute
 //   error is non-nil if and only if the command failed to execute
 //
-func ExecuteCommand(name string, args ...string) (string, string, int, error) {
+func executeCommand(name string, args ...string) (string, string, int, error) {
 	cmd := exec.Command(name, args...)
 
 	exitValue := 0
@@ -335,7 +355,7 @@ func (c *Client) PullImage(opts PullImageOptions, auth AuthConfiguration) error 
 		dockerPullArg = opts.Repository + ":" + opts.Tag
 	}
 
-	stdout, stderr, exitValue, err := ExecuteCommand("docker", "pull", dockerPullArg)
+	stdout, stderr, exitValue, err := executeCommand("docker", "pull", dockerPullArg)
 
 	if err != nil {
 		return err
