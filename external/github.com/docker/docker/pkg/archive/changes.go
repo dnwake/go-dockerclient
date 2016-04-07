@@ -13,10 +13,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/fsouza/go-dockerclient/external/github.com/Sirupsen/logrus"
-	"github.com/fsouza/go-dockerclient/external/github.com/docker/docker/pkg/idtools"
-	"github.com/fsouza/go-dockerclient/external/github.com/docker/docker/pkg/pools"
-	"github.com/fsouza/go-dockerclient/external/github.com/docker/docker/pkg/system"
+	"github.com/dnwake/go-dockerclient/external/github.com/Sirupsen/logrus"
+	"github.com/dnwake/go-dockerclient/external/github.com/docker/docker/pkg/idtools"
+	"github.com/dnwake/go-dockerclient/external/github.com/docker/docker/pkg/pools"
+	"github.com/dnwake/go-dockerclient/external/github.com/docker/docker/pkg/system"
 )
 
 // ChangeType represents the change type.

@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"io"
 
-	"github.com/fsouza/go-dockerclient/external/golang.org/x/net/context"
+	"github.com/dnwake/go-dockerclient/external/golang.org/x/net/context"
 )
 
 type readCloserWrapper struct {

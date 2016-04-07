@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/fsouza/go-dockerclient/external/golang.org/x/net/context"
+	"github.com/dnwake/go-dockerclient/external/golang.org/x/net/context"
 )
 
 func ExampleWithTimeout() {

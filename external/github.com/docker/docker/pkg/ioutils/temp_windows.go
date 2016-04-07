@@ -5,7 +5,7 @@ package ioutils
 import (
 	"io/ioutil"
 
-	"github.com/fsouza/go-dockerclient/external/github.com/docker/docker/pkg/longpath"
+	"github.com/dnwake/go-dockerclient/external/github.com/docker/docker/pkg/longpath"
 )
 
 // TempDir is the equivalent of ioutil.TempDir, except that the result is in Windows longpath format.

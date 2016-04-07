@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/fsouza/go-dockerclient/external/github.com/docker/go-units"
+	"github.com/dnwake/go-dockerclient/external/github.com/docker/go-units"
 )
 
 // TestMemInfo tests parseMemInfo with a static meminfo string

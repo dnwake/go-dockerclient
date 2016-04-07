@@ -1,7 +1,7 @@
 # go-dockerclient
 
 [![Travis](https://img.shields.io/travis/fsouza/go-dockerclient.svg?style=flat-square)](https://travis-ci.org/fsouza/go-dockerclient)
-[![GoDoc](https://img.shields.io/badge/api-Godoc-blue.svg?style=flat-square)](https://godoc.org/github.com/fsouza/go-dockerclient)
+[![GoDoc](https://img.shields.io/badge/api-Godoc-blue.svg?style=flat-square)](https://godoc.org/github.com/dnwake/go-dockerclient)
 
 This package presents a client for the Docker remote API. It also provides
 support for the extensions in the [Swarm API](https://docs.docker.com/swarm/swarm-api/).
@@ -17,7 +17,7 @@ For more details, check the [remote API documentation](http://docs.docker.com/en
 
 If you are having issues with Go 1.5 and have `GO15VENDOREXPERIMENT` set with an application that has go-dockerclient vendored,
 please update your vendoring of go-dockerclient :) We recently moved the `vendor` directory to `external` so that go-dockerclient
-is compatible with this configuration. See [338](https://github.com/fsouza/go-dockerclient/issues/338) and [339](https://github.com/fsouza/go-dockerclient/pull/339)
+is compatible with this configuration. See [338](https://github.com/dnwake/go-dockerclient/issues/338) and [339](https://github.com/dnwake/go-dockerclient/pull/339)
 for details.
 
 ## Example
@@ -28,7 +28,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/fsouza/go-dockerclient"
+	"github.com/dnwake/go-dockerclient"
 )
 
 func main() {
@@ -56,7 +56,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/fsouza/go-dockerclient"
+	"github.com/dnwake/go-dockerclient"
 )
 
 func main() {
@@ -80,7 +80,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/fsouza/go-dockerclient"
+	"github.com/dnwake/go-dockerclient"
 )
 
 func main() {

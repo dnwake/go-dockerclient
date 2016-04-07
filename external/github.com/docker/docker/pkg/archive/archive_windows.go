@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/fsouza/go-dockerclient/external/github.com/docker/docker/pkg/longpath"
+	"github.com/dnwake/go-dockerclient/external/github.com/docker/docker/pkg/longpath"
 )
 
 // fixVolumePathPrefix does platform specific processing to ensure that if

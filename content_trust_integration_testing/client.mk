@@ -28,7 +28,7 @@ client: client_image notary registry
 		--privileged \
 		--name=${CLIENT_CONTAINER_NAME} \
 		-v /var/run/docker.sock:/var/run/docker.sock \
-		-v $(GO_DOCKERCLIENT_DIR):/root/go/src/github.com/fsouza/go-dockerclient \
+		-v $(GO_DOCKERCLIENT_DIR):/root/go/src/github.com/dnwake/go-dockerclient \
                 -v $(THISDIR)/src:/root/go/src/main \
 		--link $(NOTARY_CONTAINER_NAME_1):$(NOTARY_HOST) \
 		--link $(REGISTRY_CONTAINER_NAME):$(REGISTRY_HOST) \
