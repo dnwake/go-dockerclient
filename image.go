@@ -15,6 +15,8 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -270,8 +272,13 @@ func (c *Client) PushImage(opts PushImageOptions, auth AuthConfiguration) error 
 // from a registry.
 //
 // See https://goo.gl/iJkZjD for more details.
-
-
+type PullImageOptions struct {
+	Repository    string `qs:"fromImage"`
+	Registry      string
+	Tag           string
+	OutputStream  io.Writer `qs:"-"`
+	RawJSONStream bool      `qs:"-"`
+}
 
 // ExecuteCommand executes the specified command
 //
@@ -285,23 +292,24 @@ func (c *Client) PushImage(opts PushImageOptions, auth AuthConfiguration) error 
 //   error is non-nil if and only if the command failed to execute
 //
 func ExecuteCommand(name string, args ...string) (string, string, int, error) {
-  cmd := exec.Command(name, args)
+	cmd := exec.Command(name, args...)
 
-  exitValue := 0
-  var stdout bytes.Buffer
-  var stderr bytes.Buffer
-  cmd.Stdout = &stdout
-  cmd.Stderr = &stderr
+	exitValue := 0
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
 
-  err := cmd.Run()
+	err := cmd.Run()
 
-  if err != nil {
-    if exitError, ok := err.(*exec.ExitError); ok {
-      exitValue = exitError.Sys().(syscall.WaitStatus).ExitStatus()
-   } else {
-      return "", "", -1, err
-   }
-   return stdout.String(), stderr.String(), exitValue, nil
+	if err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			exitValue = exitError.Sys().(syscall.WaitStatus).ExitStatus()
+		} else {
+			return "", "", -1, err
+		}
+	}
+	return stdout.String(), stderr.String(), exitValue, nil
 }
 
 // PullImage pulls an image from a remote registry, logging progress to
@@ -313,31 +321,31 @@ func (c *Client) PullImage(opts PullImageOptions, auth AuthConfiguration) error 
 		return ErrNoSuchImage
 	}
 
-	tagIsEmpty  := opts.Tag == nil || len(opts.Tag) == 0
-	tagIsDigest := opts.Tag != nil && strings.Index(opts.Tag, ":") >= 0
+	tagIsEmpty := (opts.Tag == "")
+	tagIsDigest := (strings.Index(opts.Tag, ":") >= 0)
 
-	dockerPullArg string
+	dockerPullArg := ""
 
-	if (tagIsEmpty) {
-	   dockerPullArg = opts.Repository
-	} else if (tagIsDigest) {
-	   dockerPullArg = opts.Repository + "@" + opts.Tag
+	if tagIsEmpty {
+		dockerPullArg = opts.Repository
+	} else if tagIsDigest {
+		dockerPullArg = opts.Repository + "@" + opts.Tag
 	} else {
-	   // tag is actually a tag
-	   dockerPullArg = opts.Repository + ":" + opts.Tag
+		// tag is actually a tag
+		dockerPullArg = opts.Repository + ":" + opts.Tag
 	}
 
-        stdout, stderr, exitValue, err := ExecuteCommand("docker", "pull", dockerPullArg)
+	stdout, stderr, exitValue, err := ExecuteCommand("docker", "pull", dockerPullArg)
 
 	if err != nil {
-	   return err
+		return err
 	}
 
 	if exitValue != 0 {
-	   return errors.New("Command 'docker pull " + dockerPullArg + "' failed with exit value " +
-	   	  	   	  exitValue + " and stderr '" + stderr + "'")
-	}	
-	
+		return errors.New("Command 'docker pull " + dockerPullArg + "' failed with exit value: " +
+			strconv.Itoa(exitValue) + ", stdout: '" + stdout + "' and stderr: '" + stderr + "'")
+	}
+
 	return nil
 }
 
