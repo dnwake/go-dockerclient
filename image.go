@@ -14,6 +14,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
+	"syscall"
 	"time"
 )
 
@@ -268,12 +270,38 @@ func (c *Client) PushImage(opts PushImageOptions, auth AuthConfiguration) error 
 // from a registry.
 //
 // See https://goo.gl/iJkZjD for more details.
-type PullImageOptions struct {
-	Repository    string `qs:"fromImage"`
-	Registry      string
-	Tag           string
-	OutputStream  io.Writer `qs:"-"`
-	RawJSONStream bool      `qs:"-"`
+
+
+
+// ExecuteCommand executes the specified command
+//
+// Returns (stdout, stderr, exitValue, error), where
+//   stdout is the command's standard output, as a string
+//      or the empty string if the command failed to execute
+//   stderr is the command's standard error, as a string
+//      or the empty string if the command failed to execute
+//   exitValue is the command's exit value, as an int
+//      or -1 if the command failed to execute
+//   error is non-nil if and only if the command failed to execute
+//
+func ExecuteCommand(name string, args ...string) (string, string, int, error) {
+  cmd := exec.Command(name, args)
+
+  exitValue := 0
+  var stdout bytes.Buffer
+  var stderr bytes.Buffer
+  cmd.Stdout = &stdout
+  cmd.Stderr = &stderr
+
+  err := cmd.Run()
+
+  if err != nil {
+    if exitError, ok := err.(*exec.ExitError); ok {
+      exitValue = exitError.Sys().(syscall.WaitStatus).ExitStatus()
+   } else {
+      return "", "", -1, err
+   }
+   return stdout.String(), stderr.String(), exitValue, nil
 }
 
 // PullImage pulls an image from a remote registry, logging progress to
@@ -285,11 +313,32 @@ func (c *Client) PullImage(opts PullImageOptions, auth AuthConfiguration) error 
 		return ErrNoSuchImage
 	}
 
-	headers, err := headersWithAuth(auth)
-	if err != nil {
-		return err
+	tagIsEmpty  := opts.Tag == nil || len(opts.Tag) == 0
+	tagIsDigest := opts.Tag != nil && strings.Index(opts.Tag, ":") >= 0
+
+	dockerPullArg string
+
+	if (tagIsEmpty) {
+	   dockerPullArg = opts.Repository
+	} else if (tagIsDigest) {
+	   dockerPullArg = opts.Repository + "@" + opts.Tag
+	} else {
+	   // tag is actually a tag
+	   dockerPullArg = opts.Repository + ":" + opts.Tag
 	}
-	return c.createImage(queryString(&opts), headers, nil, opts.OutputStream, opts.RawJSONStream)
+
+        stdout, stderr, exitValue, err := ExecuteCommand("docker", "pull", dockerPullArg)
+
+	if err != nil {
+	   return err
+	}
+
+	if exitValue != 0 {
+	   return errors.New("Command 'docker pull " + dockerPullArg + "' failed with exit value " +
+	   	  	   	  exitValue + " and stderr '" + stderr + "'")
+	}	
+	
+	return nil
 }
 
 func (c *Client) createImage(qs string, headers map[string]string, in io.Reader, w io.Writer, rawJSONStream bool) error {
