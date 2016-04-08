@@ -9,7 +9,7 @@ package unix_test
 import (
 	"testing"
 
-	"github.com/fsouza/go-dockerclient/external/golang.org/x/sys/unix"
+	"github.com/dnwake/go-dockerclient/external/golang.org/x/sys/unix"
 )
 
 const MNT_WAIT = 1
