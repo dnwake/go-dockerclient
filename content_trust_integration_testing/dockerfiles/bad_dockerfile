@@ -1,0 +1,3 @@
+FROM debian:jessie 
+RUN /bin/echo "I AM BAD" > /var/am_i_bad
+ENTRYPOINT ["/bin/bash","-c","sleep 10; cat /var/am_i_bad"]
