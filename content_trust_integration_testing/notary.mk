@@ -41,7 +41,7 @@ $(NOTARY_IMAGE): $(NOTARY_REPO_DIR)/notary
 $(NOTARY_REPO_DIR)/notary:
 	mkdir -p $(NOTARY_REPO_DIR)
 	cd $(NOTARY_REPO_DIR) && git clone https://github.com/docker/notary.git
-	cd $(NOTARY_REPO_DIR)/notary && git checkout trust-sandbox
+	cd $(NOTARY_REPO_DIR)/notary && git checkout docker-v1.10.2  ###trust-sandbox
 
 clean_notary_containers:
 	docker rm -f -v $(NOTARY_CONTAINER_NAME_1) $(NOTARY_CONTAINER_NAME_2) $(NOTARY_CONTAINER_NAME_3) >/dev/null 2>&1; true

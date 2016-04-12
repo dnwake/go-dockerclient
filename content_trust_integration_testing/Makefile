@@ -10,7 +10,7 @@ clean: clean_containers
 
 clean_all: clean_containers clean_images clean_dirs
 
-clean_containers: clean_notary_containers clean_registry_container clean_client_container clean_image_pusher_container
+clean_containers: clean_notary_containers clean_registry_container clean_client_container clean_image_pusher_containers
 
 clean_images: clean_notary_images clean_registry_image clean_client_image clean_good_image clean_bad_image list_images
 
